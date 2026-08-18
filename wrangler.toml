@@ -1,8 +1,10 @@
 name = "idleb-store"
 compatibility_date = "2026-08-18"
-pages_build_output_dir = "./site"
+
+[assets]
+directory = "./site"
 
 [[d1_databases]]
 binding = "DB"
 database_name = "idleb-store-orders"
-database_id = "REPLACE_WITH_YOUR_D1_DATABASE_ID"
+database_id = "4215bc10-2a39-4bff-a81f-3cbc9a17698b"
