@@ -1,7 +1,5 @@
-name = "idleb-store"
+name = "idleb"
 compatibility_date = "2026-08-18"
-
-pages_build_output_dir = "./site"
 
 [[d1_databases]]
 binding = "DB"
