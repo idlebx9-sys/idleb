@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>IDLEB STORE | متجر إدلب</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+  <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+  
+  <!-- Emergency Loader Fix - يعمل حتى لو فشل تحميل app.js -->
+  <script>
+    (function() {
+      // إخفاء شاشة التحميل بعد 2.5 ثانية
+      setTimeout(function() {
+        var loader = document.getElementById('siteLoader');
+        if (loader) {
+          loader.classList.add('hidden');
+          console.log('✅ Loader hidden (timeout 1)');
+        }
+      }, 2500);
+      
+      // تأمين إضافي: إخفاء بعد 4 ثواني كحد أقصى
+      setTimeout(function() {
+        var loader = document.getElementById('siteLoader');
+        if (loader && !loader.classList.contains('hidden')) {
+          loader.classList.add('hidden');
+          console.log('✅ Loader hidden (timeout 2 - emergency)');
+        }
+      }, 4000);
+    })();
+  </script>
+</head>
+<body>
+  <!-- شاشة التحميل -->
+  <div id="siteLoader" class="site-loader">
+    <div class="loader-inner">
+      <img id="loaderLogo" src="" alt="IDLEB STORE" class="loader-logo">
+      <div class="loader-spinner"></div>
+      <p>جاري تحميل IDLEB STORE...</p>
+    </div>
+  </div>
+  
+  <!-- Navbar -->
+  <nav class="navbar" id="navbar">
+    <div class="nav-container">
+      <a href="#home" class="logo" onclick="showPage('home')">
+        <span class="logo-icon">◆</span>
+        <span>IDLEB STORE</span>
+      </a>
+      <div class="nav-links" id="navLinks">
+        <a href="#home" onclick="showPage('home')">الرئيسية</a>
+        <a href="#categories" onclick="showPage('categories')">الأقسام</a>
+        <a href="#cart" onclick="showPage('cart')" class="cart-link">
+          السلة <span class="cart-badge" id="cartBadge">0</span>
+        </a>
+        <a href="#wallet" onclick="showPage('wallet')">المحفظة</a>
+        <a href="#about" onclick="showPage('about')">معلومات صاحب الموقع</a>
+        <a href="#login" onclick="showPage('login')" id="loginNavBtn">تسجيل الدخول</a>
+        <span id="userBalance" class="user-balance hidden">الرصيد: <b id="balanceAmount">0</b></span>
+        <button id="logoutBtn" class="btn-logout hidden" onclick="logout()">خروج</button>
+      </div>
+      <button class="menu-toggle" id="menuToggle" aria-label="القائمة">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- Main Content -->
+  <main id="mainContent">
+    <!-- HOME PAGE -->
+    <section id="page-home" class="page active">
+      <div class="hero">
+        <div class="hero-content">
+          <h1 class="hero-title">IDLEB <span>STORE</span></h1>
+          <p class="hero-desc">متجرك الموثوق لخدمات التبنيد، فك الباند، الرشق، وشحن الألعاب<br>سرعة • أمان • جودة عالية</p>
+          <a href="#categories" class="btn btn-primary" onclick="showPage('categories')">تصفح الخدمات</a>
+        </div>
+      </div>
+
+      <div class="section">
+        <h2 class="section-title">أقسام المتجر</h2>
+        <div class="categories-grid" id="homeCategories"></div>
+      </div>
+
+      <div class="section">
+        <h2 class="section-title">الأكثر مبيعاً</h2>
+        <div class="products-grid" id="bestSellers"></div>
+      </div>
+    </section>
+
+    <!-- CATEGORIES PAGE -->
+    <section id="page-categories" class="page">
+      <div class="section">
+        <h2 class="section-title">جميع الأقسام</h2>
+        <div class="categories-grid" id="allCategories"></div>
+      </div>
+    </section>
+
+    <!-- CATEGORY PRODUCTS PAGE -->
+    <section id="page-category" class="page">
+      <div class="section">
+        <button class="btn btn-secondary back-btn" onclick="showPage('categories')">← العودة للأقسام</button>
+        <h2 class="section-title" id="categoryTitle">المنتجات</h2>
+        <div class="products-grid" id="categoryProducts"></div>
+      </div>
+    </section>
+
+    <!-- PRODUCT DETAIL PAGE -->
+    <section id="page-product-detail" class="page">
+      <div class="section product-detail-section">
+        <button class="btn btn-secondary back-btn" onclick="showPage('categories')">← العودة للأقسام</button>
+        <div id="productDetailContent"></div>
+      </div>
+    </section>
+
+    <!-- CART PAGE -->
+    <section id="page-cart" class="page">
+      <div class="section">
+        <h2 class="section-title">سلة المشتريات</h2>
+        <div id="cartEmpty" class="empty-state hidden">
+          <p>السلة فارغة</p>
+          <a href="#categories" class="btn btn-primary" onclick="showPage('categories')">تصفح المنتجات</a>
+        </div>
+        <div id="cartContent" class="cart-content">
+          <div class="cart-items" id="cartItems"></div>
+          <div class="cart-summary">
+            <div class="form-group">
+              <label>رقم واتساب العميل <span class="required">*</span></label>
+              <input type="tel" id="orderWhatsapp" placeholder="مثال: +9639xxxxxxxx" required>
+            </div>
+            <div class="summary-row">
+              <span>المجموع:</span>
+              <span id="cartTotal">0</span>
+            </div>
+            <button class="btn btn-primary btn-full" id="checkoutBtn" onclick="checkout()">إتمام الطلب</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- WALLET / TOP-UP PAGE -->
+    <section id="page-wallet" class="page">
+      <div class="section">
+        <h2 class="section-title">المحفظة وشحن الرصيد</h2>
+        <div class="wallet-card">
+          <div class="wallet-balance">
+            <span>رصيدك الحالي</span>
+            <h3 id="walletBalance">0</h3>
+          </div>
+          <button class="btn btn-primary btn-lg" id="addBalanceBtn" onclick="showTopUpModal()">إضافة رصيد</button>
+        </div>
+        <div id="walletVerificationNotice" class="verification-retry hidden">يرجى تفعيل حسابك عبر البريد الإلكتروني قبل استخدام المحفظة أو شحن الرصيد.</div>
+
+        <div id="topUpSection" class="topup-section hidden">
+          <div class="sham-cash-box">
+            <h3>شحن عبر شام كاش</h3>
+            <div class="wallet-image-box">
+              <img id="walletPaymentImage" src="" alt="صورة الدفع" class="wallet-payment-image">
+              <p class="wallet-code">بيانات المحفظة / الدفع</p>
+              <div class="code-row">
+                <code id="shamCode">SY-IDLEB-2025-SCASH</code>
+                <button class="btn btn-sm" onclick="copyShamCode()">نسخ</button>
+              </div>
+            </div>
+            <p class="hint">قم بتحويل المبلغ ثم أدخل بيانات العملية أدناه</p>
+            <form id="topUpForm" class="topup-form" onsubmit="submitTopUp(event)">
+              <div class="form-group">
+                <label>رقم العملية</label>
+                <input type="text" id="txNumber" required placeholder="رقم العملية من شام كاش">
+              </div>
+              <div class="form-group">
+                <label>المبلغ المرسل</label>
+                <input type="number" id="txAmount" required min="1" placeholder="المبلغ">
+              </div>
+              <div class="form-group">
+                <label>العملة</label>
+                <select id="txCurrency" required>
+                  <option value="SYP">ليرة سورية (SYP)</option>
+                  <option value="USD">دولار (USD)</option>
+                </select>
+              </div>
+              <button type="submit" class="btn btn-primary btn-full">إرسال طلب الشحن</button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ABOUT OWNER PAGE -->
+    <section id="page-about" class="page">
+      <div class="section owner-section">
+        <div class="owner-card">
+          <div class="owner-hero">
+            <img id="ownerPhoto" src="" alt="صاحب الموقع" class="owner-photo">
+            <span class="owner-badge">OWNER</span>
+          </div>
+          <div class="owner-info">
+            <p class="eyebrow">IDLEB STORE</p>
+            <h2 id="ownerName">MOOHAMED || IDLEB X</h2>
+            <p id="ownerBio">صاحب ومشرف متجر IDLEB STORE — نوفر خدمات رقمية باحترافية وسرعة، مع متابعة مباشرة للطلبات وخدمة عملاء واضحة.</p>
+            <div class="owner-contact-grid">
+              <a id="ownerPhone" class="contact-card" href="#" target="_blank" rel="noopener"><span>📱</span><div><small>رقم الإدارة</small><strong>غير محدد</strong></div></a>
+              <a id="ownerTelegram" class="contact-card" href="#" target="_blank" rel="noopener"><span>✈️</span><div><small>حساب تيليجرام</small><strong>غير محدد</strong></div></a>
+              <a id="ownerChannel" class="contact-card" href="#" target="_blank" rel="noopener"><span>📢</span><div><small>القناة الأساسية</small><strong>غير محدد</strong></div></a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- LOGIN PAGE -->
+<!-- LOGIN PAGE -->
+<section id="page-login" class="page">
+  <div class="section login-section">
+    <div class="auth-card">
+      <h2>تسجيل الدخول / إنشاء حساب</h2>
+      <form id="loginForm" onsubmit="handleAuth(event)" novalidate>
+        <div class="form-group">
+          <label>اسم المستخدم</label>
+          <input type="text" id="authUsername" required minlength="3" placeholder="اسم المستخدم">
+        </div>
+        <div class="form-group">
+          <label>البريد الإلكتروني <span class="required">*</span></label>
+          <input type="email" id="authEmail" required placeholder="name@example.com" autocomplete="email">
+        </div>
+        <div class="form-group">
+          <label>كلمة المرور <span class="required">*</span></label>
+          <input type="password" id="authPassword" required minlength="4" placeholder="كلمة المرور" autocomplete="new-password">
+        </div>
+        <div class="form-group">
+          <label>تأكيد كلمة المرور <span class="required">*</span></label>
+          <input type="password" id="authPasswordConfirm" required minlength="4" placeholder="أعد كتابة كلمة المرور" autocomplete="new-password">
+        </div>
+        <button type="submit" class="btn btn-primary btn-full">دخول / إنشاء حساب</button>
+      </form>
+      
+      <!-- صندوق إدخال رمز التفعيل -->
+      <div id="verificationCodeBox" class="verification-retry hidden" style="margin-top: 16px;">
+        <p><strong>🔐 رمز التفعيل</strong></p>
+        <p class="muted" style="color: #9b96a8; font-size: 0.9rem;">أرسلنا رمزًا من 6 أرقام إلى بريدك الإلكتروني. أدخله هنا لإكمال التسجيل.</p>
+        <input id="verificationCodeInput" class="verification-code-input" inputmode="numeric" autocomplete="one-time-code" maxlength="6" pattern="[0-9]{6}" placeholder="مثال: 123456" aria-label="رمز التفعيل" style="width:100%; text-align:center; direction:ltr; font-size:1.5rem; letter-spacing:8px; padding:12px; border-radius:10px; border:1px solid #2a2735; background:#1c1b24; color:#fff; margin:8px 0;">
+        <button type="button" class="btn btn-primary btn-full" onclick="verifyOTP()" style="margin-top:8px;">✅ تفعيل الحساب</button>
+      </div>
+      
+      <!-- صندوق إعادة الإرسال -->
+      <div id="verificationRetryBox" class="verification-retry hidden" style="margin-top: 12px;">
+        <p id="verificationRetryMessage" style="color: #9b96a8; font-size: 0.9rem;"></p>
+        <button type="button" class="btn btn-secondary btn-full" onclick="resendVerification()">🔄 إعادة إرسال رمز التفعيل</button>
+      </div>
+      
+      <p class="auth-hint">الحسابات الجديدة تحتاج تفعيل البريد الإلكتروني قبل الشراء أو استخدام المحفظة.</p>
+    </div>
+  </div>
+</section>
+    <!-- EMAIL VERIFICATION PAGE -->
+    <section id="page-verify" class="page">
+      <div class="section verification-section">
+        <div id="verificationPending" class="verification-box hidden">
+          <div class="verification-icon">✉</div>
+          <h2>تأكيد البريد الإلكتروني</h2>
+          <p>أدخل رمز التفعيل الذي وصلك إلى بريدك الإلكتروني من صفحة تسجيل الدخول.</p>
+        </div>
+        <div id="verificationSuccess" class="verification-box hidden">
+          <div class="verification-icon success">✓</div>
+          <h2>تم تفعيل حسابك بنجاح!</h2>
+          <p>يمكنك تسجيل الدخول الآن واستخدام المتجر.</p>
+          <button class="btn btn-primary" onclick="showPage('login')">تسجيل الدخول</button>
+        </div>
+        <div id="verificationError" class="verification-box hidden">
+          <div class="verification-icon error">!</div>
+          <h2 id="verificationErrorTitle">رابط التفعيل غير صالح</h2>
+          <p id="verificationErrorMessage">الرابط غير صالح أو منتهي الصلاحية.</p>
+          <button class="btn btn-secondary" onclick="showPage('login')">العودة لتسجيل الدخول</button>
+          <button id="verificationResendBtn" class="btn btn-primary" onclick="resendVerificationEmail()">إرسال رابط جديد</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- CHECKOUT / ORDER SUCCESS -->
+    <section id="page-order-success" class="page">
+      <div class="section">
+        <div class="success-box">
+          <div class="success-icon">✓</div>
+          <h2>تم استلام طلبك بنجاح!</h2>
+          <p id="orderSuccessMsg">سيتم مراجعة الطلب وتنفيذه قريباً</p>
+          <a href="#home" class="btn btn-primary" onclick="showPage('home')">العودة للرئيسية</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- ADMIN PAGE (hidden, access via #admin) -->
+    <section id="page-admin" class="page">
+      <div class="admin-wrapper">
+        <div id="adminLogin" class="admin-login">
+          <h2>لوحة التحكم - دخول الإدمن</h2>
+          <form onsubmit="adminLogin(event)">
+            <div class="form-group">
+              <label>اسم المستخدم</label>
+              <input type="text" id="adminUser" required>
+            </div>
+            <div class="form-group">
+              <label>كلمة المرور</label>
+              <input type="password" id="adminPass" required>
+            </div>
+            <button type="submit" class="btn btn-primary btn-full">دخول</button>
+          </form>
+        </div>
+
+        <div id="adminPanel" class="admin-panel hidden">
+          <div class="admin-header">
+            <h2>لوحة تحكم IDLEB STORE</h2>
+            <button class="btn btn-secondary" onclick="adminLogout()">خروج من اللوحة</button>
+          </div>
+
+          <div class="admin-tabs">
+            <button class="tab-btn active" data-tab="stats" onclick="switchAdminTab('stats')">إحصائيات</button>
+            <button class="tab-btn" data-tab="categories" onclick="switchAdminTab('categories')">الأقسام</button>
+            <button class="tab-btn" data-tab="products" onclick="switchAdminTab('products')">المنتجات</button>
+            <button class="tab-btn" data-tab="topups" onclick="switchAdminTab('topups')">طلبات الشحن</button>
+            <button class="tab-btn" data-tab="orders" onclick="switchAdminTab('orders')">الطلبات</button>
+            <button class="tab-btn" data-tab="users" onclick="switchAdminTab('users')">المستخدمين</button>
+            <button class="tab-btn" data-tab="settings" onclick="switchAdminTab('settings')">إعدادات الموقع</button>
+          </div>
+
+          <!-- STATS -->
+          <div id="admin-stats" class="admin-tab-content active">
+            <div class="stats-grid" id="statsGrid"></div>
+          </div>
+
+          <!-- CATEGORIES -->
+          <div id="admin-categories" class="admin-tab-content">
+            <div class="admin-actions">
+              <button class="btn btn-primary" onclick="showAddCategoryForm()">+ إضافة قسم</button>
+            </div>
+            <div id="addCategoryForm" class="admin-form hidden">
+              <input type="text" id="catName" placeholder="اسم القسم">
+              <input type="text" id="catImage" placeholder="رابط الصورة (أو اترك فارغ)">
+              <button class="btn btn-primary" onclick="addCategory()">حفظ</button>
+              <button class="btn btn-secondary" onclick="hideAddCategoryForm()">إلغاء</button>
+            </div>
+            <div class="admin-table-wrap">
+              <table class="admin-table" id="catsTable">
+                <thead><tr><th>الاسم</th><th>الصورة</th><th>الترتيب</th><th>إجراءات</th></tr></thead>
+                <tbody></tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- PRODUCTS -->
+          <div id="admin-products" class="admin-tab-content">
+            <div class="admin-actions">
+              <button class="btn btn-primary" onclick="showAddProductForm()">+ إضافة منتج</button>
+            </div>
+            <div id="addProductForm" class="admin-form hidden">
+              <input type="text" id="prodName" placeholder="اسم المنتج">
+              <textarea id="prodDesc" placeholder="الوصف"></textarea>
+              <input type="number" id="prodPrice" placeholder="السعر الأساسي" min="0" step="0.01">
+              <input type="number" id="prodUnitSize" placeholder="وحدة التسعير (مثلاً 1000 للرشق)" min="1" value="1000">
+              <input type="text" id="prodImage" placeholder="رابط الصورة">
+              <select id="prodCategory"></select>
+              <select id="prodType">
+                <option value="accounts">تبنيد / خدمة حساب</option>
+                <option value="unban">فك باند</option>
+                <option value="boost_followers">رشق متابعين</option>
+                <option value="boost_engagement">رشق تفاعل</option>
+                <option value="boost_views">رشق مشاهدات</option>
+                <option value="games">شحن ألعاب</option>
+                <option value="other">خدمة أخرى</option>
+              </select>
+              <input type="text" id="prodPricingNote" placeholder="وصف التسعير، مثال: كل 1000 متابع = 2$">
+              <label><input type="checkbox" id="prodActive" checked> نشط</label>
+              <button class="btn btn-primary" onclick="addProduct()">حفظ</button>
+              <button class="btn btn-secondary" onclick="hideAddProductForm()">إلغاء</button>
+            </div>
+            <div class="admin-table-wrap">
+              <table class="admin-table" id="prodsTable">
+                <thead><tr><th>الاسم</th><th>القسم</th><th>السعر</th><th>النوع</th><th>الحالة</th><th>إجراءات</th></tr></thead>
+                <tbody></tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- TOPUPS -->
+          <div id="admin-topups" class="admin-tab-content">
+            <div class="admin-table-wrap">
+              <table class="admin-table" id="topupsTable">
+                <thead><tr><th>المستخدم</th><th>رقم العملية</th><th>المبلغ</th><th>العملة</th><th>الحالة</th><th>التاريخ</th><th>إجراءات</th></tr></thead>
+                <tbody></tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- ORDERS -->
+          <div id="admin-orders" class="admin-tab-content">
+            <div class="admin-table-wrap">
+              <table class="admin-table" id="ordersTable">
+                <thead><tr><th>رقم الطلب</th><th>العميل</th><th>واتساب</th><th>الخدمات والتفاصيل</th><th>المجموع</th><th>الحالة</th><th>التاريخ</th><th>إجراءات</th></tr></thead>
+                <tbody></tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- USERS -->
+          <div id="admin-users" class="admin-tab-content">
+            <div class="admin-form">
+              <h4>إضافة رصيد يدوي</h4>
+              <input type="text" id="manualUser" placeholder="اسم المستخدم">
+              <input type="number" id="manualAmount" placeholder="المبلغ" min="1">
+              <button class="btn btn-primary" onclick="addManualBalance()">إضافة</button>
+            </div>
+            <div class="admin-table-wrap">
+              <table class="admin-table" id="usersTable">
+                <thead><tr><th>اسم المستخدم</th><th>البريد</th><th>الرصيد</th><th>الحالة</th><th>تاريخ الإنشاء</th></tr></thead>
+                <tbody></tbody>
+              </table>
+            </div>
+          </div>
+          
+          <!-- SETTINGS -->
+          <div id="admin-settings" class="admin-tab-content">
+            <div class="admin-form settings-form">
+              <h3>إعدادات الموقع</h3>
+              <label>صورة المحفظة / الدفع (رابط الصورة)</label>
+              <input type="text" id="settingWalletImage" placeholder="https://...">
+              <label>رقم الإدارة</label>
+              <input type="text" id="settingAdminPhone" placeholder="+963...">
+              <label>حساب تيليجرام</label>
+              <input type="text" id="settingTelegram" placeholder="https://t.me/...">
+              <label>قناة الموقع الأساسية</label>
+              <input type="text" id="settingChannel" placeholder="https://t.me/...">
+              <label>صورة صاحب الموقع (رابط)</label>
+              <input type="text" id="settingOwnerPhoto" placeholder="https://...">
+              <label>اسم صاحب الموقع</label>
+              <input type="text" id="settingOwnerName" value="MOOHAMED || IDLEB X">
+              <label>نبذة صاحب الموقع</label>
+              <textarea id="settingOwnerBio" rows="4"></textarea>
+              <label>شعار شاشة التحميل (رابط، اختياري)</label>
+              <input type="text" id="settingLoaderLogo" placeholder="https://...">
+              <label>مدة شاشة التحميل بالثواني</label>
+              <input type="number" id="settingLoaderSeconds" min="1" max="10" step="0.5" value="2.5">
+              <hr class="settings-divider">
+              <h4>إعدادات EmailJS لتفعيل البريد</h4>
+              <p class="settings-help">أنشئ Template في EmailJS وضع متغيرات: {{username}} و {{to_email}} و {{verification_code}} و {{expiry_hours}}.</p>
+              <label>public_key</label>
+              <input type="text" id="settingEmailjsPublicKey" placeholder="EmailJS Public Key">
+              <label>service_id</label>
+              <input type="text" id="settingEmailjsServiceId" placeholder="service_xxxxxxx">
+              <label>template_verify_id</label>
+              <input type="text" id="settingEmailjsTemplateVerifyId" placeholder="template_xxxxxxx">
+              <label>verification_expiry (بالساعات)</label>
+              <input type="number" id="settingVerificationExpiry" min="1" max="168" step="1" value="24">
+              <button class="btn btn-primary" onclick="saveSiteSettings()">حفظ الإعدادات</button>
+            </div>
+          </div>
+
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- DIRECT CHECKOUT MODAL -->
+  <div id="quickOrderModal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="quickOrderTitle">
+    <div class="modal-card">
+      <button class="modal-close" onclick="closeQuickOrder()" aria-label="إغلاق">×</button>
+      <div class="modal-head">
+        <span class="eyebrow">IDLEB STORE</span>
+        <h3 id="quickOrderTitle">شراء الخدمة</h3>
+        <p id="quickOrderSummary"></p>
+      </div>
+      <div id="quickOrderForm" class="quick-order-form"></div>
+      <div class="quick-order-total"><span>الإجمالي</span><strong id="quickOrderTotal">0 $</strong></div>
+      <button class="btn btn-primary btn-full" onclick="submitQuickOrder()">تأكيد الطلب والدفع</button>
+    </div>
+  </div>
+
+  <!-- ADMIN ORDER DETAILS MODAL -->
+  <div id="orderDetailsModal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="orderDetailsTitle">
+    <div class="modal-card modal-wide">
+      <button class="modal-close" onclick="closeOrderDetails()" aria-label="إغلاق">×</button>
+      <div class="modal-head">
+        <span class="eyebrow">ORDER DETAILS</span>
+        <h3 id="orderDetailsTitle">تفاصيل الطلب</h3>
+      </div>
+      <div id="orderDetailsContent" class="order-details-content"></div>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div id="toast" class="toast"></div>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="footer-content">
+      <p>© 2026 IDLEB STORE — جميع الحقوق محفوظة</p>
+      <p class="footer-note">خدمات رقمية سريعة وآمنة</p>
+    </div>
+  </footer>
+
+  <script src="js/app.js"></script>
+</body>
+</html>

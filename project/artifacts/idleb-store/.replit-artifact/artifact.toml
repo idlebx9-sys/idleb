@@ -1,0 +1,28 @@
+kind = "web"
+previewPath = "/"
+title = "IDLEB STORE"
+description = "A polished Arabic digital services storefront with a powerful admin order center, detailed customer requests, service catalog management, wallet flows, and responsive RTL design."
+version = "1.0.0"
+id = "artifacts/idleb-store"
+router = "path"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 18698
+
+[services.development]
+run = "pnpm --filter @workspace/idleb-store run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/idleb-store", "run", "build" ]
+serve = "static"
+publicDir = "artifacts/idleb-store/dist/public"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "18698"
+BASE_PATH = "/"
