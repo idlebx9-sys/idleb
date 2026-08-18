@@ -1,0 +1,10 @@
+name = "idleb"
+compatibility_date = "2026-08-18"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "idleb-store-orders"
+database_id = "4215bc10-2a39-4bff-a81f-3cbc9a17698b"
+
+[assets]
+directory = "./site"
